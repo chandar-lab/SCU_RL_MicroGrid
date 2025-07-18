@@ -1,0 +1,845 @@
+# config.yaml
+seed: 12345
+
+# Agent configuration
+agent:
+  algorithm: SAC
+  policy: MlpPolicy
+  learning_rate: 0.0003
+  features_extractor_kwargs:
+    features_dim: 32
+    hidden_dim: 64
+    num_mlp_layers: 3
+    include_demand_pred: True
+    include_soc_tp_buffer: 'only_last_soc_tp'
+
+
+# Experiment runner configuration
+runner:
+  total_timesteps: 500000
+  eval_freq: 72000
+  n_eval_episodes: 10
+  batch_size: 32
+
+# Environment configuration
+environment:
+  env_name: MicroGridEnv-v0
+  max_episode_steps: 1440
+  train: True
+  render_mode: human
+  return_dict: False
+  setpoint_action: True
+  time_step: 1  # in minutes
+  microgrid:
+    device:
+      const_params: {}
+      init_params:
+        genset_group:
+          controller:
+            const_params: {}
+            init_params: {
+              obs_type: params
+            }
+          device: 
+            const_params:
+              n_gensets:
+                value: 2
+                type: integer
+            init_params: 
+              gensets:
+              -
+                device:
+                  const_params:
+                    alpha_g:
+                      value: 0.25
+                      type: float
+                    beta_g:
+                      value: 10
+                      type: float
+                    prime_power_rating:
+                      value: 400
+                      type: float
+                    temp_overload_factor:
+                      value: 1.1
+                      type: float
+                    noise_level:
+                      value: none # options: {none, low, medium, high}
+                      type: string
+                    noise_range_percentage:
+                      value: 0.2
+                      type: float
+                  init_params:
+                    running: 
+                      value: random              # options: {random, False, True}
+                      type: boolean
+                    init_power_setpoint: # Float number in kW
+                      value: random
+                      type: float
+                      min: 0
+                      max: 400      
+                    obs_type: params
+                controller:
+                  const_params:
+                    minimum_run_time:
+                      value: 30
+                      type: integer
+                    minimum_load:
+                      value: 120
+                      type: float
+                    warmup_power:
+                      value: 100
+                      type: float
+                    cooldown_power:
+                      value: 0
+                      type: float
+                    warmup_time:
+                      value: 3
+                      type: integer
+                    cooldown_time:
+                      value: 6
+                      type: integer
+                    average_active_power_constraint:
+                      value: True
+                      type: boolean
+                    average_active_power_window:
+                      value: 2880
+                      type: integer
+                    average_active_power_limit:
+                      value: 0.7
+                      type: float
+                  init_params:
+                    status:
+                      value: random_list          
+                      type: string
+                      elements: ["off", running, warmup, cooldown]
+                    time_since_warmup:
+                      value: random              
+                      type: integer
+                      min: 0
+                      max: 2
+                    time_since_cooldown:
+                      value: random              
+                      type: integer
+                      min: 0
+                      max: 5
+                    time_since_start:
+                      value: random             
+                      type: integer
+                      min: 0
+                      max: 29
+                    average_active_power:
+                      value: random             
+                      type: float  
+                      min: 200                  # = 0.5 * prime power rating
+                      max: 260                # = 0.65 * prime power rating. The max is at 0.7 * prime power rating, so we do not want to initialize too close to it.
+                    obs_type: params
+              -
+                device:
+                  const_params:
+                    alpha_g:
+                      value: 0.25                # in l/kWh
+                      type: float
+                    beta_g:
+                      value: 10                  # in l/h
+                      type: float
+                    prime_power_rating:
+                      value: 400                 # in kW
+                      type: float
+                    temp_overload_factor:
+                      value: 1.1                 # ratio (1.1 for 10% overload)
+                      type: float
+                    noise_level:
+                      value: none                # options: {none, low, medium, high}
+                      type: string
+                    noise_range_percentage:
+                      value: 0.2
+                      type: float
+                  init_params:
+                    running: 
+                      value: False
+                      type: boolean
+                    init_power_setpoint: 
+                      value: 0
+                      type: float
+                    obs_type: params
+                controller:
+                  const_params:
+                    minimum_run_time:
+                      value: 30
+                      type: integer
+                    minimum_load:
+                      value: 120
+                      type: float
+                    warmup_power:
+                      value: 100
+                      type: float
+                    cooldown_power:
+                      value: 0
+                      type: float
+                    warmup_time:
+                      value: 3
+                      type: integer
+                    cooldown_time:
+                      value: 6
+                      type: integer
+                    average_active_power_constraint:
+                      value: True
+                      type: boolean
+                    average_active_power_window:
+                      value: 2880
+                      type: integer
+                    average_active_power_limit:
+                      value: 0.7
+                      type: float
+                  init_params:
+                    status:
+                      value: random_list          
+                      type: string
+                      elements: ["off", running, warmup, cooldown]
+                    time_since_warmup: 
+                      value: 0
+                      type: integer
+                    time_since_cooldown: 
+                      value: 0
+                      type: integer
+                    time_since_start: 
+                      value: 0
+                      type: integer
+                    average_active_power: 
+                      value: 240
+                      type: float
+                    obs_type: params
+                type: list
+              obs_type: params
+        battery:
+          device:
+            const_params:
+              P_nom:
+                value: 600
+                type: float
+              soc_min:
+                value: 0
+                type: float
+              soc_max:
+                value: 1
+                type: float
+              I_nom:
+                value: 672
+                type: float
+              Q_max:
+                value: 672
+                type: float
+              eta_charge:
+                value: 0.95
+                type: float
+              R:
+                value: 0.039375
+                type: float
+              A:
+                value: 39.6
+                type: float
+              B:
+                value: 929.16
+                type: float
+              alpha_d:
+                value: 5
+                type: float
+              beta:
+                value: 1
+                type: float
+              degradation_cost_type:
+                value: cycle_based
+                type: string
+              buffer_size:
+                value: 30
+                type: integer
+              noise_level:
+                value: None
+                type: string
+              noise_range_percentage:
+                value: 0.2
+                type: float
+            init_params:
+              soc:                 # Initial state of charge
+                value: random             
+                type: float  
+                min: 0.1        
+                max: 0.9        
+              p_grid:
+                value: 1            # Initial power setpoint in kW  
+                type: float
+              obs_type: params
+          controller:
+            const_params:
+              soc_max_norm:
+                value: 0.9
+                type: float
+              soc_min_norm:
+                value: 0.1
+                type: float
+              soc_max_res:
+                value: 0.95
+                type: float
+              soc_min_res:
+                value: 0.05
+                type: float
+            init_params:
+              obs_type: params
+        demand:
+          controller:
+            const_params: {}
+            init_params:
+              obs_type: params
+          device:
+            init_params:
+              obs_type: params
+            const_params:
+              mode: 
+                value: 'data'
+                type: string
+              nb_pred_time_steps:
+                value: 30
+                type: integer
+              normalisation_factor:
+                value: 300
+                type: float
+              pred_time_step:
+                value: 1
+                type: integer 
+              forecast_model:
+                value: 'forecast'
+                type: string
+
+        wind_turbine:
+          device:
+            const_params:
+              pred_time_step:
+                value: 1
+                type: integer
+              nb_pred_time_steps:
+                value: 30
+                type: integer
+              mode:
+                value: data
+                type: string
+              nominal_power:
+                value: 400
+                type: float
+              perlin_params:
+                average:
+                  value: 200
+                  type: float
+                nb_octaves:
+                  value: 5
+                  type: integer
+                octaves_step:
+                  value: 4
+                  type: integer
+                period:
+                  value: 1440
+                  type: integer
+                persistence:
+                  value: 0.8
+                  type: float
+                lacunarity:
+                  value: 2.5
+                  type: float
+                repeat:
+                  value: 1024
+                  type: integer
+            init_params: 
+              active:
+                value: True
+                type: boolean
+              turbine_setpoint:
+                value: 0    #  Initial power setpoint in kW
+                type: float
+              obs_type: params
+          controller:
+            const_params:
+              power_max:
+                value: 400
+                type: float
+              power_min:
+                value: 0
+                type: float
+            init_params: 
+              obs_type: params
+
+        external_world:
+          init_date_time:
+            value: random
+            type: date
+            min: "2018-01-09 00:00:00" #"2018-05-11 00:00:00"
+            max: "2018-11-29 23:59:00" # random # TODO: random or fixed
+        
+        obs_type: params
+
+    controller:
+      const_params:
+        check_initialization:
+          value: True
+          type: boolean
+        init_check_steps:
+          value: 8
+          type: integer
+        init_check_loops:
+          value: 100
+          type: integer
+        wind_turbine_priority:
+          value: True
+          type: boolean
+        check_balance: 
+          value: True
+          type: boolean
+        check_reserve: 
+          value: True
+          type: boolean
+        adjust_battery: 
+          value: True
+          type: boolean
+        forecast_shield: 
+          value: False
+          type: boolean
+        conservativeness_coeff: 
+          value: 1
+          type: float
+        min_available_wind_power: 
+          value: 0
+          type: float
+        max_available_wind_power_drop_step: 
+          value: 0.18
+          type: float
+        max_demand: 
+          value: 570
+          type: float
+        max_demand_increase_step: 
+          value: 80
+          type: float
+      init_params:
+        obs_type: params
+
+
+  reward:
+    include_fuel_reward: 1
+    include_maintenance_reward: 1
+    include_shield_reward: 0
+    include_balance_reward: 1
+    fuel_consumption_coeff: 1
+    controllable_fuel_cons_coeff: 0  # this is designed so that either controllable_fuel_cons or fuel_consumption is used, so one coefficient should be 0
+    configuration_coeff: 0
+    battery_degradation_coeff: 1
+    battery_startcharge_coeff: 0
+    battery_variation_coeff: 0
+    genset_start_coeff: 0
+    genset_overload_coeff: 0
+    neg_balance_coeff: 100
+    pos_balance_coeff: 60
+    battery_shield_coeff: 3
+    genset_shield_coeff: 3
+
+
+eval_environment:
+  env_name: MicroGridEnv-v0
+  max_episode_steps: 1440
+  render_mode: human
+  train: False
+  return_dict: False
+  setpoint_action: True
+  time_step: 1
+  microgrid:
+    device:
+      const_params: {}
+      init_params:
+        genset_group:
+          controller:
+            const_params: {}
+            init_params:
+              obs_type: params 
+          device: 
+            const_params:
+              n_gensets:
+                value: 2
+                type: integer
+            init_params:
+              gensets:
+              -
+                device:
+                  const_params:
+                    alpha_g:
+                      value: 0.25
+                      type: float
+                    beta_g:
+                      value: 10
+                      type: float
+                    prime_power_rating:
+                      value: 400
+                      type: float
+                    temp_overload_factor:
+                      value: 1.1
+                      type: float
+                    noise_level:
+                      value: none
+                      type: string
+                    noise_range_percentage:
+                      value: 0.2
+                      type: float
+                  init_params:
+                    running: 
+                      value: True
+                      type: boolean
+                    init_power_setpoint:
+                      value: 0
+                      type: float
+                    obs_type: params
+                controller:
+                  const_params:
+                    minimum_run_time:
+                      value: 30
+                      type: integer
+                    minimum_load:
+                      value: 120
+                      type: float
+                    warmup_power:
+                      value: 100
+                      type: float
+                    cooldown_power:
+                      value: 0
+                      type: float
+                    warmup_time:
+                      value: 3
+                      type: integer
+                    cooldown_time:
+                      value: 6
+                      type: integer
+                    average_active_power_constraint:
+                      value: True
+                      type: boolean
+                    average_active_power_window:
+                      value: 2880
+                      type: integer
+                    average_active_power_limit:
+                      value: 0.7
+                      type: float
+                  init_params:
+                    status:
+                      value: running
+                      type: string
+                      elements: ["off", running, warmup, cooldown]
+                    time_since_warmup:
+                      value: 0
+                      type: integer
+                    time_since_cooldown:
+                      value: 0
+                      type: integer
+                    time_since_start:
+                      value: 40
+                      type: integer
+                    average_active_power:
+                      value: 270
+                      type: float
+                    obs_type: params
+              -
+                device:
+                  const_params:
+                    alpha_g:
+                      value: 0.25
+                      type: float
+                    beta_g:
+                      value: 10
+                      type: float
+                    prime_power_rating:
+                      value: 400
+                      type: float
+                    temp_overload_factor:
+                      value: 1.1
+                      type: float
+                    noise_level:
+                      value: none
+                      type: string
+                    noise_range_percentage:
+                      value: 0.2
+                      type: float
+                  init_params:
+                    running: 
+                      value: False
+                      type: boolean
+                    init_power_setpoint: 
+                      value: 0
+                      type: float
+                    obs_type: params
+                controller:
+                  const_params:
+                    minimum_run_time:
+                      value: 30
+                      type: integer
+                    minimum_load:
+                      value: 120
+                      type: float
+                    warmup_power:
+                      value: 100
+                      type: float
+                    cooldown_power:
+                      value: 0
+                      type: float
+                    warmup_time:
+                      value: 3
+                      type: integer
+                    cooldown_time:
+                      value: 6
+                      type: integer
+                    average_active_power_constraint:
+                      value: True
+                      type: boolean
+                    average_active_power_window:
+                      value: 2880
+                      type: integer
+                    average_active_power_limit:
+                      value: 0.7
+                      type: float
+                  init_params:
+                    status:
+                      value: "off"
+                      type: string
+                      elements: ["off", running, warmup, cooldown]
+                    time_since_warmup: 
+                      value: 0
+                      type: integer
+                    time_since_cooldown: 
+                      value: 0
+                      type: integer
+                    time_since_start: 
+                      value: 0
+                      type: integer
+                    average_active_power: 
+                      value: 240
+                      type: float
+                    obs_type: params
+                type: list
+              obs_type: params
+        battery:
+          device:
+            const_params:
+              P_nom:
+                value: 600
+                type: float
+              soc_min:
+                value: 0
+                type: float
+              soc_max:
+                value: 1
+                type: float
+              I_nom:
+                value: 672
+                type: float
+              Q_max:
+                value: 672
+                type: float
+              eta_charge:
+                value: 0.95
+                type: float
+              R:
+                value: 0.039375
+                type: float
+              A:
+                value: 39.6
+                type: float
+              B:
+                value: 929.16
+                type: float
+              alpha_d:
+                value: 5
+                type: float
+              beta:
+                value: 1
+                type: float
+              degradation_cost_type:
+                value: cycle_based
+                type: string
+              buffer_size:
+                value: 30
+                type: integer
+              noise_level:
+                value: None
+                type: string
+              noise_range_percentage:
+                value: 0.2
+                type: float
+            init_params:
+              soc:
+                value: 0.2
+                type: float
+              p_grid:
+                value: 1
+                type: float
+              obs_type: params
+          controller:
+            const_params:
+              soc_max_norm:
+                value: 0.9
+                type: float
+              soc_min_norm:
+                value: 0.1
+                type: float
+              soc_max_res:
+                value: 0.95
+                type: float
+              soc_min_res:
+                value: 0.05
+                type: float
+            init_params:
+              obs_type: params
+
+        demand:
+          controller:
+            const_params: {}
+            init_params:
+              obs_type: params
+          device:
+            init_params:
+              obs_type: params
+            const_params:
+              mode: 
+                value: 'data'
+                type: string
+              nb_pred_time_steps:
+                value: 30
+                type: integer
+              normalisation_factor:
+                value: 300
+                type: float
+              pred_time_step:
+                value: 1
+                type: integer
+              forecast_model:
+                value: 'forecast'
+                type: string
+
+        wind_turbine:
+          device:
+            const_params:
+              pred_time_step:
+                value: 1
+                type: integer
+              nb_pred_time_steps:
+                value: 30
+                type: integer
+              mode:
+                value: data
+                type: string
+              nominal_power:
+                value: 400
+                type: float
+              perlin_params:
+                average:
+                  value: 200
+                  type: float
+                nb_octaves:
+                  value: 5
+                  type: integer
+                octaves_step:
+                  value: 4
+                  type: integer
+                period:
+                  value: 1440
+                  type: integer
+                persistence:
+                  value: 0.8
+                  type: float
+                lacunarity:
+                  value: 2.5
+                  type: float
+                repeat:
+                  value: 1024
+                  type: integer
+            init_params:
+              active:
+                value: True
+                type: boolean            
+              turbine_setpoint:
+                value: 0
+                type: float
+              obs_type: params
+          controller:
+            const_params:
+              power_max:
+                value: 400
+                type: float
+              power_min:
+                value: 0
+                type: float
+            init_params: 
+              obs_type: params
+
+        external_world:
+          init_date_time:
+            value: random_list
+            type: date
+            elements: ["2018-02-01 07:00:00", "2018-03-01 07:00:00", "2018-04-01 07:00:00", 
+                  "2018-05-01 07:00:00", "2018-06-01 07:00:00", "2018-07-01 07:00:00",
+                  "2018-08-01 07:00:00", "2018-09-01 07:00:00", "2018-10-01 07:00:00",
+                  "2018-11-01 07:00:00"]
+        
+        obs_type: params
+          
+    controller:
+      const_params:
+        check_initialization:
+          value: True
+          type: boolean
+        init_check_steps:
+          value: 8
+          type: integer
+        init_check_loops:
+          value: 100
+          type: integer
+        wind_turbine_priority:
+          value: True
+          type: boolean
+        check_balance:
+          value: True
+          type: boolean
+        check_reserve:
+          value: True
+          type: boolean
+        adjust_battery:
+          value: True
+          type: boolean
+        forecast_shield:
+          value: False
+          type: boolean
+        conservativeness_coeff:
+          value: 1
+          type: float
+        min_available_wind_power:
+          value: 0
+          type: float
+        max_available_wind_power_drop_step:
+          value: 0.18
+          type: float
+        max_demand:
+          value: 570
+          type: float
+        max_demand_increase_step:
+          value: 80
+          type: float
+      init_params:
+        obs_type: params
+
+  reward:
+    include_fuel_reward: 1
+    include_maintenance_reward: 1
+    include_shield_reward: 0
+    include_balance_reward: 1
+    fuel_consumption_coeff: 1
+    controllable_fuel_cons_coeff: 0  # this is designed so that either controllable_fuel_cons or fuel_consumption is used, so one coefficient should be 0
+    configuration_coeff: 0
+    battery_degradation_coeff: 1
+    battery_startcharge_coeff: 0
+    battery_variation_coeff: 0
+    genset_start_coeff: 0
+    genset_overload_coeff: 0
+    neg_balance_coeff: 0
+    pos_balance_coeff: 0
+    battery_shield_coeff: 0
+    genset_shield_coeff: 0
