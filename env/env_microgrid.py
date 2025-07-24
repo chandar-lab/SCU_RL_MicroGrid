@@ -19,7 +19,7 @@ class MicroGridEnv(gym.Env):
         super(MicroGridEnv, self).__init__()
         self.env_params = env_params
         
-        wind_turbine_steps = self.env_params['microgrid']['device']['wind_turbine']['device']['const_params']['nb_pred_time_step']['value'] if 'wind_turbine' in self.env_params['microgrid'].keys() else 10
+        wind_turbine_steps = self.env_params['microgrid']['device']['init_params']['wind_turbine']['device']['const_params']['nb_pred_time_steps']['value'] if 'wind_turbine' in self.env_params['microgrid']['device']['init_params'].keys() else 10
         if not self.env_params['return_dict']:
             self.action_space = gym.spaces.Box(low=np.array([-1, -1]),
                                     high=np.array([1, 1]), shape=(2,), dtype=float)
