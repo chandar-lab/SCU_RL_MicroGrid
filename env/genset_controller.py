@@ -112,6 +112,7 @@ class GensetController(Controller):
                 self.average_active_power = controller_state['average_active_power']
                 self.controllable_status = controller_state['controllable_status']
                 self.controllable_power = controller_state['controllable_power']
+                self.available_power = controller_state['available_power']            
             elif controller_state['obs_type'] == 'params':
                 self.status = controller_state['status']['value']
                 self.time_since_cooldown = controller_state['time_since_cooldown']['value']
@@ -120,7 +121,8 @@ class GensetController(Controller):
                 self.average_active_power = controller_state['average_active_power']['value']
                 self.controllable_status = self.check_controllable_status()
                 self.controllable_power = self.check_controllable_power()
-
+                self.available_power = self.update_available_power(reserve_available=True)
+                
     def simulator_dynamic_update(self, valid_action, reserve_available):
         # Update the genset simulator based on the action taken by the controller
         valid_action = self.generate_safe_action(valid_action, reserve_available)
