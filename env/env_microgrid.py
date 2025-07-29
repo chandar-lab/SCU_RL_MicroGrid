@@ -2,7 +2,7 @@ import gymnasium as gym
 
 try:
     from env.microgrid import MicroGrid
-    from env.microgrid_controller import MicroGridController
+    from env.microgrid_controller import MicroGridController, MicrogridInitializationError
     from env.utils import generate_init_parameters
 except:
     from microgrid import MicroGrid
