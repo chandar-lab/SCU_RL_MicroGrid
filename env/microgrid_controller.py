@@ -53,16 +53,6 @@ class MicroGridController(Controller):
         # Reset the simulator with initial parameters
         self.microgrid_sim.reset(microgrid_device_init_params, real = False)
 
-        # Check initialization validity and return an error if not initialized correctly
-        
-        if self.check_initialization == True:         
-            verified = self.verify_initialization_validity()
-            if not verified:
-                raise MicrogridInitializationError("The microgrid is not initialized correctly. Check the initial parameters to ensure it is possible to recover from the initial state.")
-        else:
-            verified = True
-
-        return verified
 
     def check_valid(self, processed_action):
         pass
@@ -281,19 +271,20 @@ class MicroGridController(Controller):
         """
         Check if the microgrid's initial state is ensured to be recoverable relying only on the shield. If not, try to reset the microgrid until it can.
         """
-        i = 0
+        if self.check_initialization == False:
+            return True
+        else:
+            start_next_action = {
+                'genset_group': {'status_change': 'start_next'},     # Start the next genset at every time step
+                'battery': {'p_grid': np.inf}                        # Because the shield does not control the battery, we must assume the worst: the agent will discharge the battery as much as possible
+            }
 
-        start_next_action = {
-            'genset_group': {'status_change': 'start_next'},     # Start the next genset at every time step
-            'battery': {'p_grid': np.inf}                        # Because the shield does not control the battery, we must assume the worst: the agent will discharge the battery as much as possible
-        }
+            next_actions = [start_next_action] * self.init_check_steps
 
-        next_actions = [start_next_action] * self.init_check_steps
+            balanced = self.check_pos_balance_n_steps(self.init_check_steps, next_actions, reserve_available = False, verbose = verbose) if self.check_balance else True
+            reserve_balanced = self.check_pos_balance_n_steps(self.init_check_steps, next_actions, reserve_available = True, verbose = verbose) if self.check_reserve else True
 
-        balanced = self.check_pos_balance_n_steps(self.init_check_steps, next_actions, reserve_available = False, verbose = verbose) if self.check_balance else True
-        reserve_balanced = self.check_pos_balance_n_steps(self.init_check_steps, next_actions, reserve_available = True, verbose = verbose) if self.check_reserve else True
-
-        return balanced and reserve_balanced
+            return balanced and reserve_balanced
     
     def check_pos_balance_n_steps(self, nb_steps, next_actions, reserve_available, verbose = False):
         """
@@ -400,4 +391,5 @@ class MicroGridController(Controller):
         copy_self.check_reserve = False
         observations_pred = copy_self.simulator_dynamic_update(action, reserve_available, verbose = verbose)
         return observations_pred
+
     
