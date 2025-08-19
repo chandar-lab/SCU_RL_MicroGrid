@@ -1,5 +1,5 @@
 import numpy as np
-
+import copy
 
 # Random agent
 class RandomAgent:
@@ -31,7 +31,7 @@ class ConstantAgent:
         }
 
     def predict(self, observation, state=None, episode_start=1, deterministic=True):
-        return self.action, None
+        return copy.deepcopy(self.action), None
 
 
 class TurnoffDischargeAgent(ConstantAgent):
@@ -101,7 +101,7 @@ class RealisticAgent():
         self.high_demand_steps = 0
         self.low_demand_steps = 0
         self.n_gensets = env.env_params['microgrid']['device']['init_params']['genset_group']['device']['const_params']['n_gensets']['value']
-        self.minimum_power_gensets = [env.env_params['microgrid']['device']['init_params']['genset_group']['device']['init_params']['gensets'][idx]['const_params']['minimum_load']['value'] for idx in range(self.n_gensets)]
+        self.minimum_power_gensets = [env.env_params['microgrid']['device']['init_params']['genset_group']['device']['init_params']['gensets'][idx]['controller']['const_params']['minimum_load']['value'] for idx in range(self.n_gensets)]
 
     def predict(self, observation, state=None, episode_start=1, deterministic=True):            
         genset_status_change = self.get_genset_group_change(observation)
@@ -224,8 +224,9 @@ class RealisticAgent():
 
             else:
             # Discharge battery to the maximum (the shield handles the rest)
-                battery_p_grid = np.inf
+                battery_p_grid = 999999
 
 
 
         return battery_p_grid
+
