@@ -199,7 +199,24 @@ class MicroGridEnv(gym.Env):
         else:
             obs = self.prune_obs_dict(observations)
 
-        info = {}
+        info = observations['device_observations']
+        if info["action_command"]['genset_group']['status_change'] == 'start_next':
+            info["action_command"]['genset_group']['status_change'] = 1
+        elif info["action_command"]['genset_group']['status_change'] == 'stop_last':
+            info["action_command"]['genset_group']['status_change'] = -1
+        elif info["action_command"]['genset_group']['status_change'] == 'none':
+            info["action_command"]['genset_group']['status_change'] = 0
+        else:
+            raise ValueError("Invalid command genset group status change action: {}".format(info["action_command"]['genset_group']['status_change']))
+        
+        if info["action_implemented"]['genset_group']['status_change'] == 'start_next':
+            info["action_implemented"]['genset_group']['status_change'] = 1
+        elif info["action_implemented"]['genset_group']['status_change'] == 'stop_last':
+            info["action_implemented"]['genset_group']['status_change'] = -1
+        elif info["action_implemented"]['genset_group']['status_change'] == 'none':
+            info["action_implemented"]['genset_group']['status_change'] = 0
+        else:
+            raise ValueError("Invalid implemented genset group status change action: {}".format(info["action_implemented"]['genset_group']['status_change']))
         
         return obs, info
 
@@ -269,6 +286,24 @@ class MicroGridEnv(gym.Env):
             truncated = True
 
         info = new_state_dict   # We return the actual microgrid state (and not the controller's observation) as info
+
+        if info["action_command"]['genset_group']['status_change'] == 'start_next':
+            info["action_command"]['genset_group']['status_change'] = 1.0
+        elif info["action_command"]['genset_group']['status_change'] == 'stop_last':
+            info["action_command"]['genset_group']['status_change'] = -1.0
+        elif info["action_command"]['genset_group']['status_change'] == 'none':
+            info["action_command"]['genset_group']['status_change'] = 0.0
+        else:
+            raise ValueError("Invalid command genset group status change action: {}".format(info["action_command"]['genset_group']['status_change']))
+        
+        if info["action_implemented"]['genset_group']['status_change'] == 'start_next':
+            info["action_implemented"]['genset_group']['status_change'] = 1.0
+        elif info["action_implemented"]['genset_group']['status_change'] == 'stop_last':
+            info["action_implemented"]['genset_group']['status_change'] = -1.0
+        elif info["action_implemented"]['genset_group']['status_change'] == 'none':
+            info["action_implemented"]['genset_group']['status_change'] = 0.0
+        else:
+            raise ValueError("Invalid implemented genset group status change action: {}".format(info["action_implemented"]['genset_group']['status_change']))
 
         return new_obs, reward, terminated, truncated, info
                 
@@ -887,4 +922,5 @@ class MicroGridEnv(gym.Env):
         
         else:
             return False
+
 
