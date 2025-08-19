@@ -74,6 +74,9 @@ class WindTurbine(System):
             self.power = np.minimum(self.available_power, init_params['turbine_setpoint']['value'])
             self.available_wind_power_pred = self.get_available_wind_power_prediction(init_params['date_time']['value'])
             self.turbine_setpoint = init_params['turbine_setpoint']['value']
+            if self.mode == "dummy":
+                self.dummy_power = self.power
+                self.dummy_power_next = self.power
             observations = self.gather_observations()
         else:
             observations = self.gather_inactive_observations()
@@ -394,3 +397,4 @@ def find_closest_prev_date(target_date, sorted_dict):
     if pos == len(keys):
         return keys[-1]
     return keys[pos - 1]
+
