@@ -4,7 +4,7 @@ import numpy as np
 # Random agent
 class RandomAgent:
     def __init__(self, env):
-        self.battery_P_nom = env.env_params['microgrid']['battery']['const_params']['P_nom']
+        self.battery_P_nom = env.env_params['microgrid']['device']['init_params']['battery']['device']['const_params']['P_nom']['value']
  
     def predict(self, observation, state=None, episode_start=1, deterministic=True):
         action = {
@@ -100,8 +100,8 @@ class RealisticAgent():
         self.max_low_demand_steps = 5   # minutes
         self.high_demand_steps = 0
         self.low_demand_steps = 0
-        self.n_gensets = env.env_params['microgrid']['genset_group']['n_gensets']
-        self.minimum_power_gensets = [env.env_params['microgrid']['genset_group']['gensets'][idx]['const_params']['minimum_load'] for idx in range(self.n_gensets)]
+        self.n_gensets = env.env_params['microgrid']['device']['init_params']['genset_group']['device']['const_params']['n_gensets']['value']
+        self.minimum_power_gensets = [env.env_params['microgrid']['device']['init_params']['genset_group']['device']['init_params']['gensets'][idx]['const_params']['minimum_load']['value'] for idx in range(self.n_gensets)]
 
     def predict(self, observation, state=None, episode_start=1, deterministic=True):            
         genset_status_change = self.get_genset_group_change(observation)
@@ -225,6 +225,7 @@ class RealisticAgent():
             else:
             # Discharge battery to the maximum (the shield handles the rest)
                 battery_p_grid = np.inf
+
 
 
         return battery_p_grid
