@@ -53,7 +53,7 @@ class WindTurbineController(Controller):
 
         # Resetting the simulator
         if self.active_turbine:
-            self.windturbine_sim.simulator_sensor_update(windturbine_sim_init_params)
+            self.windturbine_sim.reset(windturbine_sim_init_params)
 
     def update_controller_state(self, observations, next_step=False):
         """
@@ -141,4 +141,5 @@ class WindTurbineController(Controller):
         #
         # copy_self = copy.deepcopy(self)
         observations_pred = self.simulator_dynamic_update(action, next_step=next_step)
+
         return observations_pred
