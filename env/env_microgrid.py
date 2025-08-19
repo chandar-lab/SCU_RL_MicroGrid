@@ -150,7 +150,11 @@ class MicroGridEnv(gym.Env):
 
         try:
             self.microgrid.reset(microgrid_params['device']['init_params'], real = True)
-            verified = self.microgrid_controller.reset(microgrid_params['controller']['init_params'], microgrid_params['device']['init_params'])
+            self.microgrid_controller.reset(microgrid_params['controller']['init_params'], microgrid_params['device']['init_params'])
+            self.microgrid_controller.update_controller_state({'device_observations': self.microgrid.gather_observations(), 'controller_state': {}})  # Initialize the controller with the current state of the microgrid (especially important for the windturbine and demand dummies)
+            verified = self.microgrid_controller.verify_initialization_validity()
+            if not verified:
+                raise MicrogridInitializationError("The microgrid is not initialized correctly. Check the initial parameters to ensure it is possible to recover from the initial state.")
         except MicrogridInitializationError as e:
             verified = False
 
@@ -161,7 +165,11 @@ class MicroGridEnv(gym.Env):
             microgrid_params = generate_init_parameters(microgrid_params)
             try:
                 self.microgrid.reset(microgrid_params['device']['init_params'], real = True)
-                verified = self.microgrid_controller.reset(microgrid_params['controller']['init_params'], microgrid_params['device']['init_params'])
+                self.microgrid_controller.reset(microgrid_params['controller']['init_params'], microgrid_params['device']['init_params'])
+                self.microgrid_controller.update_controller_state({'device_observations': self.microgrid.gather_observations(), 'controller_state': {}})  # Initialize the controller with the current state of the microgrid (especially important for the windturbine and demand dummies)
+                verified = self.microgrid_controller.verify_initialization_validity()
+                if not verified:
+                    raise MicrogridInitializationError("The microgrid is not initialized correctly. Check the initial parameters to ensure it is possible to recover from the initial state.")
             except MicrogridInitializationError as e:
                 verified = False
                 i += 1        
@@ -879,3 +887,4 @@ class MicroGridEnv(gym.Env):
         
         else:
             return False
+
