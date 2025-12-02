@@ -80,8 +80,20 @@ To download the data files:
    huggingface-cli download chandar-lab/remote_microgrid_data --local-dir ./data/
    ```
 
+
 The data files contain normalized real-world demand and wind-power microgrid data.
 
+
+## Citation
+
+```bibtex
+@article{nekoei2025shielded,
+  title   = {Shielded Controller Units for RL with Operational Constraints Applied to Remote Microgrids},
+  author  = {Nekoei, Hadi and Blondin Massé, Alexandre and Hassani, Rachid and Chandar, Sarath and Mai, Vincent},
+  journal = {arXiv preprint arXiv:2512.01046},
+  year    = {2025}
+}
+```
 
 ## 📄 License
 
@@ -89,3 +101,4 @@ This repository uses a dual licensing model:
 
 - The **source code** is licensed under the MIT License.
 - The **data files** in the `data/` directory are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
+
