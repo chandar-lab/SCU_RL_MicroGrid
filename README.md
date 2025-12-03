@@ -1,7 +1,7 @@
 
 ## Context
 
-This code supports paper *Shielded Controller Units for RL with Industrial Constraints Applied to Remote Microgrids* submitted at AAAI 2026 Special Track on AI for Social Impact. It contains the code to reproduce its results by training and evaluating an RL agent on an realistic industrial environment while garanteeing industrial constraint.
+This code supports [*Shielded Controller Units for RL with Industrial Constraints Applied to Remote Microgrids*](https://arxiv.org/abs/2512.01046). It contains the code to reproduce its results by training and evaluating an RL agent on an realistic industrial environment while garanteeing industrial constraint.
 
 ![Microgrid SCU Architecture](microgrid_SCU.png)
 
@@ -101,4 +101,5 @@ This repository uses a dual licensing model:
 
 - The **source code** is licensed under the MIT License.
 - The **data files** in the `data/` directory are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
+
 
