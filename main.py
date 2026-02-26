@@ -17,7 +17,7 @@ env_path = os.path.join(base_dir, 'env')
 
 sys.path.append(agents_path)
 sys.path.append(env_path)
-from agents.RLAgents import RLAgent
+from agents.RLAgents import RLAgent, LagrangianUpdateCallback
 from env.env_microgrid import MicroGridEnv
 from utils import load_config, update_config, set_seed
 import os
@@ -90,7 +90,18 @@ def main():
     wandb.log({"eval/mean_reward": mean_reward, "eval_steps": 0})
 
     # for i in range(config['runner']['total_timesteps']//config['runner']['eval_freq']):
-    model.learn(config['runner']['total_timesteps'], callback=[wandb_callback, eval_callback])
+    callbacks = [wandb_callback, eval_callback]
+    if config["agent"]["algorithm"] == "LSAC":
+        lag_cfg = config["agent"].get("lagrangian", {})
+        callbacks.append(
+            LagrangianUpdateCallback(
+                lambda_lr=lag_cfg.get("lambda_lr", 1e-3),
+                cost_limit=lag_cfg.get("cost_limit", 0.05),
+                lambda_lrs=lag_cfg.get("lambda_lrs", {}),
+                cost_limits=lag_cfg.get("cost_limits", {}),
+            )
+        )
+    model.learn(config['runner']['total_timesteps'], callback=callbacks)
     # mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes=config['runner']['n_eval_episodes'])
     # wandb.log({"eval/mean_reward": mean_reward, "eval_steps": config['runner']['total_timesteps']})
     # print(f"Mean reward: {mean_reward}, Std reward: {std_reward}")
